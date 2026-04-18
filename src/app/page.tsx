@@ -27,25 +27,12 @@ const couple = [
   },
 ];
 
-type AudioBundle = {
-  context: AudioContext;
-  gain: GainNode;
-  oscillators: OscillatorNode[];
-  melodyTimer: number;
-};
-
 type TimeLeft = {
   days: number;
   hours: number;
   minutes: number;
   seconds: number;
 };
-
-declare global {
-  interface Window {
-    webkitAudioContext?: typeof AudioContext;
-  }
-}
 
 function getTimeLeft(): TimeLeft {
   const difference = Math.max(eventDate.getTime() - Date.now(), 0);
@@ -67,7 +54,7 @@ export default function Home() {
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [copied, setCopied] = useState(false);
   const [timeLeft, setTimeLeft] = useState<TimeLeft>(() => getTimeLeft());
-  const audioRef = useRef<AudioBundle | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const countdownItems = useMemo(
     () => [
@@ -88,90 +75,32 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    return () => {
-      if (audioRef.current?.melodyTimer) {
-        window.clearInterval(audioRef.current.melodyTimer);
-      }
+    // Initialize standard HTML5 Audio with the MP3 file
+    audioRef.current = new Audio("/Janji Suci_2.mp3");
+    audioRef.current.loop = true;
 
-      audioRef.current?.oscillators.forEach((oscillator) => oscillator.stop());
-      audioRef.current?.context.close();
-      audioRef.current = null;
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+        audioRef.current = null;
+      }
     };
   }, []);
 
-  function createAmbientMusic() {
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-
-    if (!AudioContextClass || audioRef.current) {
-      return audioRef.current;
-    }
-
-    const context = new AudioContextClass();
-    const gain = context.createGain();
-    const notes = [196, 246.94, 329.63, 392];
-    const oscillators = notes.map((frequency, index) => {
-      const oscillator = context.createOscillator();
-      const filter = context.createBiquadFilter();
-      const noteGain = context.createGain();
-
-      oscillator.type = index === 3 ? "sine" : "triangle";
-      oscillator.frequency.value = frequency;
-      filter.type = "lowpass";
-      filter.frequency.value = index === 3 ? 1200 : 760;
-      noteGain.gain.value = index === 3 ? 0.12 : 0.07;
-
-      oscillator.connect(filter);
-      filter.connect(noteGain);
-      noteGain.connect(gain);
-      oscillator.start();
-
-      return oscillator;
-    });
-    const melody = [392, 440, 493.88, 587.33, 493.88, 440];
-    let step = 0;
-    const melodyTimer = window.setInterval(() => {
-      const lead = oscillators[3];
-
-      lead.frequency.setTargetAtTime(
-        melody[step % melody.length],
-        context.currentTime,
-        0.12,
-      );
-      step += 1;
-    }, 1250);
-
-    gain.gain.value = 0;
-    gain.connect(context.destination);
-    audioRef.current = { context, gain, oscillators, melodyTimer };
-
-    return audioRef.current;
-  }
-
   async function playMusic() {
-    const audio = createAmbientMusic();
-
-    if (!audio) {
-      return;
+    if (!audioRef.current) return;
+    try {
+      await audioRef.current.play();
+      setIsMusicPlaying(true);
+    } catch (error) {
+      console.error("Audio playback failed:", error);
     }
-
-    if (audio.context.state === "suspended") {
-      await audio.context.resume();
-    }
-
-    audio.gain.gain.cancelScheduledValues(audio.context.currentTime);
-    audio.gain.gain.linearRampToValueAtTime(0.18, audio.context.currentTime + 0.8);
-    setIsMusicPlaying(true);
   }
 
   function pauseMusic() {
-    const audio = audioRef.current;
-
-    if (!audio) {
-      return;
-    }
-
-    audio.gain.gain.cancelScheduledValues(audio.context.currentTime);
-    audio.gain.gain.linearRampToValueAtTime(0, audio.context.currentTime + 0.4);
+    if (!audioRef.current) return;
+    audioRef.current.pause();
     setIsMusicPlaying(false);
   }
 
