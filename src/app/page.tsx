@@ -237,8 +237,6 @@ export default function Home() {
                   className="whitespace-nowrap rounded-md border border-[var(--navy-dark)]/10 bg-white/70 px-4 py-2 text-xs font-semibold tracking-wide text-[var(--navy-dark)] transition-colors hover:bg-white/90 md:text-sm" 
                   href={section.href} 
                   key={section.label}
-                  target={section.target}
-                  rel={section.target === "_blank" ? "noreferrer" : undefined}
                 >
                   {section.label}
                 </a>
