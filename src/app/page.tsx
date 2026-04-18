@@ -108,7 +108,16 @@ export default function Home() {
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [copied, setCopied] = useState(false);
   const [timeLeft, setTimeLeft] = useState<TimeLeft>(() => getTimeLeft());
+  const [guestName, setGuestName] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const to = params.get("to") || params.get("nama");
+    if (to) {
+      setGuestName(to);
+    }
+  }, []);
 
   const countdownItems = useMemo(
     () => [
@@ -198,7 +207,11 @@ export default function Home() {
           <p className="mt-6 text-base tracking-[0.18em] text-white/90 sm:text-lg">
             MINGGU LEGI, 24 MEI 2026
           </p>
-          <button className="primary-button mt-10" type="button" onClick={openInvitation}>
+          <div className="mt-8 text-white/90">
+            <p className="text-xs uppercase tracking-widest text-[var(--gold-soft)]">Kepada Yth:</p>
+            <p className="mt-2 text-xl font-medium sm:text-2xl">{guestName || "Bapak/Ibu/Saudara/i"}</p>
+          </div>
+          <button className="primary-button mt-8" type="button" onClick={openInvitation}>
             Buka Undangan
           </button>
           <p className="mt-5 max-w-md text-sm leading-6 text-white/70">
@@ -227,10 +240,27 @@ export default function Home() {
           </div>
         </nav>
 
-        <section id="home" className="relative overflow-hidden">
+        <section id="home" className="relative overflow-hidden pt-8 lg:pt-14">
           <div className="absolute pointer-events-none top-band" />
-          <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 pb-12 pt-10 sm:pb-16 sm:pt-14 md:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14 lg:pt-20">
-            <Reveal direction="up" className="relative z-10 text-center lg:text-left">
+
+          <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 pb-12 pt-4 sm:pb-16 md:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-x-14 lg:gap-y-6 lg:pt-12">
+            
+            <Reveal direction="up" delay={150} className="relative z-20 order-1 mx-auto w-[65vw] max-w-[17rem] sm:w-full sm:max-w-xs lg:col-start-2 lg:row-start-1">
+              <div className="relative aspect-[4/5] overflow-hidden rounded-t-[12rem] rounded-b-xl border-[6px] border-white shadow-2xl">
+                <Image
+                  src="/3.jpeg"
+                  alt="Potret Mempelai"
+                  fill
+                  priority
+                  className="object-cover transition-transform duration-[20s] hover:scale-110"
+                  sizes="(max-width: 768px) 70vw, 300px"
+                />
+              </div>
+              <div className="absolute -bottom-8 -right-8 -z-10 h-40 w-40 rounded-full bg-[var(--gold-soft)]/40 blur-2xl"></div>
+              <div className="absolute -left-6 top-10 -z-10 h-32 w-32 rounded-full bg-[var(--blue-gray)]/20 blur-xl"></div>
+            </Reveal>
+
+            <Reveal direction="up" delay={300} className="relative z-10 order-2 text-center lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:text-left">
               <p className="eyebrow text-[var(--gold)]">Undangan Pernikahan</p>
               <h2 className="mt-5 max-w-3xl text-4xl font-semibold leading-[1.1] text-[var(--navy-dark)] sm:text-5xl lg:text-[4.65rem] lg:leading-[1.08]">
                 Roudlotul Jannah
@@ -252,7 +282,7 @@ export default function Home() {
               </div>
             </Reveal>
 
-            <Reveal direction="up" delay={200} className="invitation-card mx-auto w-full max-w-md">
+            <Reveal direction="up" delay={200} className="invitation-card order-3 mx-auto mt-2 w-full max-w-md lg:col-start-2 lg:row-start-2 lg:mt-0">
               <p className="text-xs font-semibold tracking-[0.32em] text-[var(--gold)] uppercase sm:text-sm">Akad & Resepsi</p>
               <p className="mt-6 text-6xl font-semibold text-[var(--navy-dark)] sm:mt-8 sm:text-7xl">24</p>
               <p className="mt-2 text-xl font-medium text-[var(--navy)] sm:text-2xl">Mei 2026</p>
@@ -441,6 +471,7 @@ export default function Home() {
                     alt="Roudlotul dan Ilham saling menatap"
                     width={1080}
                     height={1920}
+                    priority
                     sizes="(max-width: 768px) 100vw, 50vw"
                   />
                 </figure>
@@ -452,6 +483,7 @@ export default function Home() {
                     alt="Roudlotul dan Ilham menunjukkan cincin"
                     width={1080}
                     height={1920}
+                    priority
                     sizes="(max-width: 768px) 100vw, 50vw"
                   />
                 </figure>
