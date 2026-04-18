@@ -103,6 +103,142 @@ function formatTwoDigits(value: number) {
   return value.toString().padStart(2, "0");
 }
 
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyRxt5YUCb6HX9l3CV0FvOXoKB9ckuobBz1V5TQ_yns-jD5o4jokkExKE1CCJxCuctg/exec";
+const BAD_WORDS = ["kasar", "dendam", "ancaman", "hutang", "pinjol", "bangsat", "anjing", "babi", "mati", "bayar", "bunuh", "jelek", "cerai"];
+
+function Guestbook() {
+  const [messages, setMessages] = useState<{nama: string, ucapan: string, timestamp: string}[]>([]);
+  const [nama, setNama] = useState("");
+  const [ucapan, setUcapan] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMSG, setErrorMSG] = useState("");
+  const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    if (SCRIPT_URL.startsWith("http")) {
+      fetch(SCRIPT_URL)
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data)) setMessages(data.reverse());
+        })
+        .catch((err) => console.error("Gagal load ucapan:", err));
+    }
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMSG("");
+    setSuccess(false);
+
+    if (!nama.trim() || !ucapan.trim()) {
+      setErrorMSG("Nama dan ucapan wajib diisi.");
+      return;
+    }
+
+    const lowerUcapan = ucapan.toLowerCase();
+    const isBad = BAD_WORDS.some((word) => lowerUcapan.includes(word));
+    if (isBad) {
+      setErrorMSG("Pesan urung dikirim: Mengandung kata yang tidak pantas.");
+      return;
+    }
+
+    setLoading(true);
+
+    if (!SCRIPT_URL.startsWith("http")) {
+      // Mock lokal (Saat belum ada URL dari klien)
+      setTimeout(() => {
+        setMessages([{ nama, ucapan, timestamp: new Date().toISOString() }, ...messages]);
+        setNama("");
+        setUcapan("");
+        setSuccess(true);
+        setLoading(false);
+      }, 500);
+      return;
+    }
+
+    // Integrasi Real
+    try {
+      const res = await fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ nama, ucapan, timestamp: new Date().toISOString() }),
+      });
+      if (res.ok) {
+        setMessages([{ nama, ucapan, timestamp: new Date().toISOString() }, ...messages]);
+        setNama("");
+        setUcapan("");
+        setSuccess(true);
+      } else {
+        setErrorMSG("Gagal menggapai server penyimpan.");
+      }
+    } catch (err) {
+      setErrorMSG("Gagal menghubungi server.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <section id="guestbook" className="section bg-[var(--navy-dark)] px-4 py-16 text-white md:px-8">
+      <div className="mx-auto max-w-3xl">
+        <Reveal direction="up" className="text-center">
+          <p className="eyebrow text-[var(--gold-soft)]">Buku Tamu</p>
+          <h2 className="mt-4 text-3xl font-semibold text-white sm:text-4xl">Tinggalkan Pesan</h2>
+          <p className="mt-4 text-[var(--gold-soft)] text-sm sm:text-base">Berikan doa restu dan harapan Anda untuk kedua mempelai.</p>
+        </Reveal>
+
+        <Reveal direction="up" delay={200} className="mt-10 rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm sm:p-8">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <input
+              type="text"
+              placeholder="Nama Anda"
+              value={nama}
+              onChange={(e) => setNama(e.target.value)}
+              className="w-full rounded-md border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-white/50 outline-none transition-colors focus:border-[var(--gold-soft)]"
+              maxLength={40}
+              disabled={loading}
+            />
+            <textarea
+              placeholder="Tuliskan ucapan dan doa restu Anda di sini..."
+              value={ucapan}
+              onChange={(e) => setUcapan(e.target.value)}
+              className="min-h-[100px] w-full resize-y rounded-md border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-white/50 outline-none transition-colors focus:border-[var(--gold-soft)]"
+              maxLength={400}
+              disabled={loading}
+            />
+            
+            {errorMSG && <p className="text-sm font-medium text-red-400">{errorMSG}</p>}
+            {success && <p className="text-sm font-medium text-green-400">Pesan Anda berhasil dikirim!</p>}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="mt-2 flex w-full items-center justify-center rounded-md bg-[var(--gold)] px-6 py-3 text-sm font-semibold text-[var(--navy-dark)] transition-transform hover:scale-[1.02] disabled:opacity-70 disabled:hover:scale-100 sm:w-auto sm:self-end"
+            >
+              {loading ? "Mengirim..." : "Kirim Ucapan"}
+            </button>
+          </form>
+        </Reveal>
+
+        <Reveal direction="up" delay={300} className="mt-12">
+          <div className="flex h-96 flex-col gap-4 overflow-y-auto pr-2 custom-scrollbar">
+            {messages.length === 0 ? (
+              <p className="text-center text-white/50 italic text-sm py-10">Belum ada ucapan. Jadilah yang pertama!</p>
+            ) : (
+              messages.map((msg, idx) => (
+                <div key={idx} className="rounded-lg border border-white/5 bg-white/5 px-5 py-4">
+                  <p className="font-semibold text-[var(--gold-soft)]">{msg.nama}</p>
+                  <p className="mt-2 text-sm leading-6 text-white/90">{msg.ucapan}</p>
+                </div>
+              ))
+            )}
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
   const [isOpened, setIsOpened] = useState(false);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
@@ -491,6 +627,8 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        <Guestbook />
 
         <footer className="relative overflow-hidden px-4 py-12 text-center text-white md:px-8 md:py-16">
           <div className="footer-watercolor" />
