@@ -1,7 +1,61 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, ReactNode } from "react";
+
+function Reveal({
+  children,
+  delay = 0,
+  className = "",
+  direction = "up",
+}: {
+  children: ReactNode;
+  delay?: number;
+  className?: string;
+  direction?: "up" | "down" | "left" | "right" | "none";
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15 }
+    );
+    const currentRef = ref.current;
+    if (currentRef) observer.observe(currentRef);
+    return () => {
+      if (currentRef) observer.disconnect();
+    };
+  }, []);
+
+  const getTransform = () => {
+    if (direction === "up") return "translateY(40px)";
+    if (direction === "down") return "translateY(-40px)";
+    if (direction === "left") return "translateX(40px)";
+    if (direction === "right") return "translateX(-40px)";
+    return "none";
+  };
+
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        opacity: isVisible ? 1 : 0,
+        transform: isVisible ? "none" : getTransform(),
+        transition: `all 0.9s cubic-bezier(0.17, 0.55, 0.55, 1) ${delay}ms`,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
 
 const eventDate = new Date("2026-05-24T08:00:00+07:00");
 const accountNumber = "0083 0115 4822 500";
@@ -75,7 +129,6 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    // Initialize standard HTML5 Audio with the MP3 file
     audioRef.current = new Audio("/Janji Suci_2.mp3");
     audioRef.current.loop = true;
 
@@ -134,12 +187,12 @@ export default function Home() {
         <div className="watercolor watercolor-top" />
         <div className="gold-dust dust-one" />
         <div className="gold-dust dust-two" />
-        <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl flex-col items-center justify-center px-4 py-10 text-center md:px-8">
+        <Reveal delay={300} className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl flex-col items-center justify-center px-4 py-10 text-center md:px-8">
           <p className="cover-eyebrow eyebrow">The Wedding Of</p>
           <h1 className="cover-title script-title mt-5 text-white">
             Roudlotul
             <span className="block text-[0.58em] text-[var(--gold-soft)]">&</span>
-            Rifa'i
+            Rifa&apos;i
           </h1>
           <div className="mt-8 h-px w-44 bg-gradient-to-r from-transparent via-[var(--gold-soft)] to-transparent" />
           <p className="mt-6 text-base tracking-[0.18em] text-white/90 sm:text-lg">
@@ -151,7 +204,7 @@ export default function Home() {
           <p className="mt-5 max-w-md text-sm leading-6 text-white/70">
             Musik akan mulai setelah undangan dibuka.
           </p>
-        </div>
+        </Reveal>
       </section>
 
       <div id="undangan" className="relative">
@@ -177,7 +230,7 @@ export default function Home() {
         <section id="home" className="relative overflow-hidden">
           <div className="absolute pointer-events-none top-band" />
           <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 pb-12 pt-10 sm:pb-16 sm:pt-14 md:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14 lg:pt-20">
-            <div className="relative z-10 text-center lg:text-left">
+            <Reveal direction="up" className="relative z-10 text-center lg:text-left">
               <p className="eyebrow text-[var(--gold)]">Undangan Pernikahan</p>
               <h2 className="mt-5 max-w-3xl text-4xl font-semibold leading-[1.1] text-[var(--navy-dark)] sm:text-5xl lg:text-[4.65rem] lg:leading-[1.08]">
                 Roudlotul Jannah
@@ -197,9 +250,9 @@ export default function Home() {
                   Kirim Tanda Kasih
                 </a>
               </div>
-            </div>
+            </Reveal>
 
-            <div className="invitation-card mx-auto w-full max-w-md">
+            <Reveal direction="up" delay={200} className="invitation-card mx-auto w-full max-w-md">
               <p className="text-xs font-semibold tracking-[0.32em] text-[var(--gold)] uppercase sm:text-sm">Akad & Resepsi</p>
               <p className="mt-6 text-6xl font-semibold text-[var(--navy-dark)] sm:mt-8 sm:text-7xl">24</p>
               <p className="mt-2 text-xl font-medium text-[var(--navy)] sm:text-2xl">Mei 2026</p>
@@ -208,33 +261,35 @@ export default function Home() {
               <p className="mt-2 text-sm leading-6 text-[var(--muted)] sm:mt-3 sm:text-base sm:leading-7">
                 Tegalrejo RT 04/RW 01, Sugihmanik, Tanggungharjo
               </p>
-            </div>
+            </Reveal>
           </div>
         </section>
 
         <section id="mempelai" className="section px-4 md:px-8">
           <div className="mx-auto max-w-6xl">
-            <div className="section-heading">
+            <Reveal direction="up" className="section-heading">
               <p className="eyebrow text-[var(--gold)]">Mempelai</p>
               <h2>Kedua Mempelai</h2>
               <p>
                 Dua keluarga bertemu dalam doa yang sama, merayakan awal
                 perjalanan baru dengan penuh syukur.
               </p>
-            </div>
+            </Reveal>
 
             <div className="mt-12 grid gap-5 md:grid-cols-2">
-              {couple.map((person) => (
-                <article className="person-card" key={person.name}>
-                  <p className="text-sm uppercase tracking-[0.28em] text-[var(--gold)]">
-                    {person.role}
-                  </p>
-                  <h3>{person.name}</h3>
-                  <p className="mt-5 text-sm text-[var(--muted)]">{person.child}</p>
-                  <p className="mt-2 text-lg leading-8 text-[var(--navy-dark)]">
-                    {person.parents}
-                  </p>
-                </article>
+              {couple.map((person, index) => (
+                <Reveal direction="up" delay={index * 150} key={person.name}>
+                  <article className="person-card h-full">
+                    <p className="text-sm uppercase tracking-[0.28em] text-[var(--gold)]">
+                      {person.role}
+                    </p>
+                    <h3>{person.name}</h3>
+                    <p className="mt-5 text-sm text-[var(--muted)]">{person.child}</p>
+                    <p className="mt-2 text-lg leading-8 text-[var(--navy-dark)]">
+                      {person.parents}
+                    </p>
+                  </article>
+                </Reveal>
               ))}
             </div>
           </div>
@@ -242,17 +297,17 @@ export default function Home() {
 
         <section id="acara" className="section event-section px-4 md:px-8">
           <div className="mx-auto max-w-6xl">
-            <div className="section-heading">
+            <Reveal direction="up" className="section-heading">
               <p className="eyebrow text-[var(--gold)]">Save The Date</p>
               <h2>Detail Acara</h2>
               <p>
                 Merupakan kehormatan bagi kami apabila Bapak/Ibu/Saudara/i
                 berkenan hadir dan memberikan doa restu.
               </p>
-            </div>
+            </Reveal>
 
             <div className="mt-12 grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
-              <div className="event-panel">
+              <Reveal direction="up" className="event-panel">
                 <span>Akad & Resepsi</span>
                 <h3>Minggu Legi, 24 Mei 2026</h3>
                 <p>Tegalrejo RT 04/RW 01, Sugihmanik, Tanggungharjo</p>
@@ -274,14 +329,16 @@ export default function Home() {
                     Simpan Tanggal
                   </a>
                 </div>
-              </div>
+              </Reveal>
 
               <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-2">
-                {countdownItems.map((item) => (
-                  <div className="countdown-item flex min-h-[7.5rem] flex-col items-center justify-center rounded-lg border border-[var(--gold-soft)]/40 bg-gradient-to-br from-[var(--navy-dark)]/95 to-[var(--navy)]/90 text-white shadow-sm sm:min-h-[8.25rem]" key={item.label}>
-                    <strong suppressHydrationWarning className="text-3xl font-bold leading-none sm:text-4xl lg:text-[3.7rem]">{item.value}</strong>
-                    <span suppressHydrationWarning className="mt-2 text-[0.7rem] font-bold uppercase tracking-[0.2em] text-white/80 sm:mt-3 sm:text-[0.82rem]">{item.label}</span>
-                  </div>
+                {countdownItems.map((item, index) => (
+                  <Reveal direction="up" delay={index * 100} key={item.label}>
+                    <div className="countdown-item flex min-h-[7.5rem] flex-col items-center justify-center rounded-lg border border-[var(--gold-soft)]/40 bg-gradient-to-br from-[var(--navy-dark)]/95 to-[var(--navy)]/90 text-white shadow-sm sm:min-h-[8.25rem]">
+                      <strong suppressHydrationWarning className="text-3xl font-bold leading-none sm:text-4xl lg:text-[3.7rem]">{item.value}</strong>
+                      <span suppressHydrationWarning className="mt-2 text-[0.7rem] font-bold uppercase tracking-[0.2em] text-white/80 sm:mt-3 sm:text-[0.82rem]">{item.label}</span>
+                    </div>
+                  </Reveal>
                 ))}
               </div>
             </div>
@@ -290,7 +347,7 @@ export default function Home() {
 
         <section id="gift" className="section gift-section px-4 md:px-8">
           <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-            <div>
+            <Reveal direction="up">
               <p className="eyebrow text-[var(--gold)]">Love Gift</p>
               <h2 className="mt-4 text-3xl font-semibold text-[var(--navy-dark)] sm:text-4xl lg:text-5xl">
                 Tanda Kasih
@@ -299,21 +356,21 @@ export default function Home() {
                 Tanpa mengurangi rasa hormat, bagi yang ingin memberikan tanda
                 kasih dapat mengirimkannya melalui rekening berikut.
               </p>
-            </div>
+            </Reveal>
 
-            <div className="bank-card mx-auto w-full max-w-md">
+            <Reveal direction="up" delay={200} className="bank-card mx-auto w-full max-w-md">
               <span>Bank BRI</span>
-              <strong>{accountNumber}</strong>
+              <strong suppressHydrationWarning>{accountNumber}</strong>
               <p>Nomor rekening</p>
               <button className="primary-button mt-7 w-full" type="button" onClick={copyAccountNumber}>
                 {copied ? "Nomor Tersalin" : "Salin Nomor Rekening"}
               </button>
-            </div>
+            </Reveal>
           </div>
         </section>
 
         <section id="doa" className="section px-4 md:px-8">
-          <div className="mx-auto max-w-4xl text-center">
+          <Reveal direction="up" className="mx-auto max-w-4xl text-center">
             <p className="eyebrow text-[var(--gold)]">Doa Restu</p>
             <h2 className="mt-4 text-3xl font-semibold text-[var(--navy-dark)] sm:text-4xl lg:text-5xl">
               Merupakan kebahagiaan bagi kami
@@ -327,21 +384,21 @@ export default function Home() {
               Wassalamu&apos;alaikum Warahmatullahi Wabarakatuh
             </p>
             <p className="script-title mt-6 text-5xl leading-none text-[var(--navy-dark)] sm:mt-8 sm:text-6xl">
-              Roudlotul & Ilham
+              Roudlotul & Rifa&apos;i
             </p>
-          </div>
+          </Reveal>
         </section>
 
         <section id="peta" className="section px-4 md:px-8" aria-label="Peta Lokasi">
           <div className="mx-auto max-w-6xl">
-            <div className="section-heading">
+            <Reveal direction="up" className="section-heading">
               <p className="eyebrow text-[var(--gold)]">Peta Lokasi</p>
               <h2>Petunjuk Arah</h2>
               <p>
                 Gunakan peta di bawah ini untuk memandu perjalanan Anda menuju lokasi acara.
               </p>
-            </div>
-            <div className="mt-10 h-80 w-full overflow-hidden rounded-xl border border-[var(--navy-dark)]/10 shadow-sm sm:h-[450px]">
+            </Reveal>
+            <Reveal direction="up" delay={200} className="mt-10 h-80 w-full overflow-hidden rounded-xl border border-[var(--navy-dark)]/10 shadow-sm sm:h-[450px]">
               <iframe
                 src="https://maps.google.com/maps?q=-7.093457,110.610134&hl=id&z=16&output=embed"
                 width="100%"
@@ -351,8 +408,8 @@ export default function Home() {
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
               />
-            </div>
-            <div className="mt-8 text-center">
+            </Reveal>
+            <Reveal direction="up" delay={300} className="mt-8 text-center">
               <a
                 className="primary-button inline-flex justify-center"
                 href="https://www.google.com/maps/search/?api=1&query=-7.093457,110.610134"
@@ -361,52 +418,56 @@ export default function Home() {
               >
                 Buka di Google Maps
               </a>
-            </div>
+            </Reveal>
           </div>
         </section>
 
         <section className="section gallery-section px-4 md:px-8" aria-label="Galeri foto">
           <div className="mx-auto max-w-6xl">
-            <div className="section-heading">
+            <Reveal direction="up" className="section-heading">
               <p className="eyebrow text-[var(--gold)]">Galeri</p>
               <h2>Potret Bahagia Kami</h2>
               <p>
                 Sedikit cerita dalam gambar, menjadi kenangan yang kami syukuri
                 menjelang hari bahagia.
               </p>
-            </div>
+            </Reveal>
 
             <div className="mt-12 grid gap-4 sm:grid-cols-2">
-              <figure className="gallery-card">
-                <Image
-                  src="/1.jpeg"
-                  alt="Roudlotul dan Ilham saling menatap"
-                  width={1080}
-                  height={1920}
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                />
-              </figure>
-              <figure className="gallery-card">
-                <Image
-                  src="/2.jpeg"
-                  alt="Roudlotul dan Ilham menunjukkan cincin"
-                  width={1080}
-                  height={1920}
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                />
-              </figure>
+              <Reveal direction="up" delay={150}>
+                <figure className="gallery-card">
+                  <Image
+                    src="/1.jpeg"
+                    alt="Roudlotul dan Ilham saling menatap"
+                    width={1080}
+                    height={1920}
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
+                </figure>
+              </Reveal>
+              <Reveal direction="up" delay={300}>
+                <figure className="gallery-card">
+                  <Image
+                    src="/2.jpeg"
+                    alt="Roudlotul dan Ilham menunjukkan cincin"
+                    width={1080}
+                    height={1920}
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
+                </figure>
+              </Reveal>
             </div>
           </div>
         </section>
 
         <footer className="relative overflow-hidden px-4 py-12 text-center text-white md:px-8 md:py-16">
           <div className="footer-watercolor" />
-          <div className="relative z-10">
+          <Reveal direction="up" className="relative z-10">
             <p className="text-xs uppercase tracking-[0.28em] text-[var(--gold-soft)] sm:text-sm">
               Minggu Legi, 24 Mei 2026
             </p>
             <p className="mt-4 text-xs text-white/75 sm:text-sm">Roudlotul Jannah & Muhammad Ilham Rifa&apos;i</p>
-          </div>
+          </Reveal>
         </footer>
 
         <button
