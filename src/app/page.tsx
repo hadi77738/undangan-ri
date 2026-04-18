@@ -211,7 +211,7 @@ export default function Home() {
         <nav className="sticky top-0 z-50 w-full border-b border-black/5 bg-[var(--background)]/90 px-4 py-3 backdrop-blur md:px-8">
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
             <a className="script-title text-2xl text-[var(--navy-dark)] md:text-3xl" href="#home">
-              R & I
+              R & R
             </a>
             <div className="no-scrollbar flex flex-1 justify-end gap-2 overflow-x-auto sm:gap-3 md:gap-4 md:overflow-visible">
               {sections.map((section) => (
