@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Undangan Roudlotul & Ilham",
+  title: "Undangan Roudlotul & Rifa'i",
   description:
     "Undangan pernikahan Roudlotul Jannah dan Muhammad Ilham Rifa'i, Minggu Legi 24 Mei 2026.",
 };

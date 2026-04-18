@@ -139,7 +139,7 @@ export default function Home() {
           <h1 className="cover-title script-title mt-5 text-white">
             Roudlotul
             <span className="block text-[0.58em] text-[var(--gold-soft)]">&</span>
-            Ilham
+            Rifa'i
           </h1>
           <div className="mt-8 h-px w-44 bg-gradient-to-r from-transparent via-[var(--gold-soft)] to-transparent" />
           <p className="mt-6 text-base tracking-[0.18em] text-white/90 sm:text-lg">
