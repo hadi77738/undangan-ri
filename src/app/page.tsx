@@ -57,7 +57,9 @@ function Reveal({
   );
 }
 
-const eventDate = new Date("2026-05-24T08:00:00+07:00");
+function getEventDate(now = new Date()) {
+  return new Date(`${now.getFullYear()}-05-24T08:00:00+07:00`);
+}
 const accountNumber = "0083 0115 4822 500";
 
 const sections = [
@@ -89,6 +91,7 @@ type TimeLeft = {
 };
 
 function getTimeLeft(): TimeLeft {
+  const eventDate = getEventDate();
   const difference = Math.max(eventDate.getTime() - Date.now(), 0);
 
   return {
