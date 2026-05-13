@@ -57,8 +57,8 @@ function Reveal({
   );
 }
 
-function getEventDate(now = new Date()) {
-  return new Date(`${now.getFullYear()}-05-24T08:00:00+07:00`);
+function getEventDate() {
+  return new Date("2026-05-24T08:00:00+07:00");
 }
 const accountNumber = "0083 0115 4822 500";
 
