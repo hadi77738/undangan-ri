@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState, ReactNode } from "react";
+import { useEffect, useRef, useState, ReactNode } from "react";
 
 function Reveal({
   children,
@@ -57,9 +57,6 @@ function Reveal({
   );
 }
 
-function getEventDate() {
-  return new Date("2026-05-24T08:00:00+07:00");
-}
 const accountNumber = "0083 0115 4822 500";
 
 const sections = [
@@ -82,29 +79,6 @@ const couple = [
     parents: "Bapak Muhidin & Ibu Kuswatiningsih",
   },
 ];
-
-type TimeLeft = {
-  days: number;
-  hours: number;
-  minutes: number;
-  seconds: number;
-};
-
-function getTimeLeft(): TimeLeft {
-  const eventDate = getEventDate();
-  const difference = Math.max(eventDate.getTime() - Date.now(), 0);
-
-  return {
-    days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-    hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-    minutes: Math.floor((difference / (1000 * 60)) % 60),
-    seconds: Math.floor((difference / 1000) % 60),
-  };
-}
-
-function formatTwoDigits(value: number) {
-  return value.toString().padStart(2, "0");
-}
 
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyRxt5YUCb6HX9l3CV0FvOXoKB9ckuobBz1V5TQ_yns-jD5o4jokkExKE1CCJxCuctg/exec";
 const BAD_WORDS = ["kasar", "dendam", "ancaman", "hutang", "pinjol", "bangsat", "anjing", "babi", "mati", "bayar", "bunuh", "jelek", "cerai"];
@@ -174,7 +148,7 @@ function Guestbook() {
       } else {
         setErrorMSG("Gagal menggapai server penyimpan.");
       }
-    } catch (err) {
+    } catch {
       setErrorMSG("Gagal menghubungi server.");
     } finally {
       setLoading(false);
@@ -246,35 +220,10 @@ export default function Home() {
   const [isOpened, setIsOpened] = useState(false);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>(() => getTimeLeft());
-  const [guestName, setGuestName] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const to = params.get("to") || params.get("nama");
-    if (to) {
-      setGuestName(to);
-    }
-  }, []);
-
-  const countdownItems = useMemo(
-    () => [
-      { label: "Hari", value: timeLeft.days.toString() },
-      { label: "Jam", value: formatTwoDigits(timeLeft.hours) },
-      { label: "Menit", value: formatTwoDigits(timeLeft.minutes) },
-      { label: "Detik", value: formatTwoDigits(timeLeft.seconds) },
-    ],
-    [timeLeft],
-  );
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setTimeLeft(getTimeLeft());
-    }, 1000);
-
-    return () => window.clearInterval(timer);
-  }, []);
+  const searchParams =
+    typeof window === "undefined" ? null : new URLSearchParams(window.location.search);
+  const guestName = searchParams?.get("to") || searchParams?.get("nama") || null;
 
   useEffect(() => {
     audioRef.current = new Audio("/Janji Suci_2.mp3");
@@ -348,7 +297,7 @@ export default function Home() {
           </p>
           <div className="mt-8 text-white/90">
             <p className="text-xs uppercase tracking-widest text-[var(--gold-soft)]">Kepada Yth:</p>
-            <p className="mt-2 text-xl font-medium sm:text-2xl">{guestName || "Bapak/Ibu/Saudara/i"}</p>
+            <p suppressHydrationWarning className="mt-2 text-xl font-medium sm:text-2xl">{guestName || "Bapak/Ibu/Saudara/i"}</p>
           </div>
           <button className="primary-button mt-8" type="button" onClick={openInvitation}>
             Buka Undangan
@@ -500,6 +449,8 @@ export default function Home() {
                 </div>
               </Reveal>
 
+              {/* Bagian hitung mundur disembunyikan sementara sesuai permintaan. */}
+              {/*
               <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-2">
                 {countdownItems.map((item, index) => (
                   <Reveal direction="up" delay={index * 100} key={item.label}>
@@ -510,6 +461,7 @@ export default function Home() {
                   </Reveal>
                 ))}
               </div>
+              */}
             </div>
           </div>
         </section>
